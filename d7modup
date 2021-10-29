@@ -1,0 +1,51 @@
+#!/bin/bash
+
+echo "Welcome to the Drupal 7 Module Update tool.  This tool will allow you to quickly update batches of Drupal 7 modules and ensure accurate commit messages.  To start, please provide the name of the Jira ticket that these updates apply to:"
+
+read ticket
+
+questions() {
+echo "What's the module's machine name?"
+
+read module
+
+echo "What's the current version?"
+
+read oldversion
+
+echo "What version are you updating to?"
+
+read newversion
+
+echo "Which site does this module apply to? (just press enter if this isn't a multisite)"
+
+read site
+
+stuff+=(lando drush pm-enable $module -y --uri=$site';'lando drush pm-update $module -y --uri=$site';'git status';'git add '.'';'
+git status';'git commit -m '"'$ticket - Module updated: $module now at $newversion '('was at $oldversion')''"'';'git status';'git log -1';')
+
+}
+questions
+
+again() {
+echo -n "Do you need to update any other modules? [y/n]: "
+read ans
+}
+
+again
+
+routing() {
+if [[ $ans == "n" ]]; then
+  echo ${stuff[@]}
+elif [[ $ans == "y" ]]; then
+  questions
+  again
+  routing
+elif [[ $ans != "y" || $ans != "n" ]]; then
+  again
+  routing
+fi
+}
+
+routing
+
